@@ -14,7 +14,7 @@ const BoilerplateCodeGenerationInputSchema = z.object({
   architectureDescription: z
     .string()
     .describe(
-      'A detailed description of the system architecture. This should include a list of core services, their primary functionalities, desired programming languages or frameworks for each service, and any notable dependencies or interactions between them. For example: "A microservices architecture with a Python Flask API gateway, a Node.js Express user service, and a Java Spring Boot product service. All services should use PostgreSQL databases and communicate via Kafka. Include Dockerfiles for each service and a docker-compose.yml." An example of expected output for a service would be: "microservice-name/src/main.py", "microservice-name/Dockerfile", etc.'
+      'A detailed description of the system architecture. This should include a list of core services, their primary functionalities, desired programming languages or frameworks for each service, and any notable dependencies or interactions between them. For example: "A microservices architecture with a Python Flask API gateway, a Node.js Express user service, and a Java Spring Boot product service. All services should use PostgreSQL databases and communicate via Kafka. Include Dockerfiles for each service and a docker-compose.yml."'
     ),
 });
 export type BoilerplateCodeGenerationInput = z.infer<
@@ -25,7 +25,7 @@ const BoilerplateCodeGenerationOutputSchema = z.object({
   dockerizedBoilerplateCode: z
     .string()
     .describe(
-      'The complete Dockerized boilerplate code for the described architecture. This includes placeholder code for each service, their respective Dockerfiles, and a docker-compose.yml file to orchestrate them. The output should be formatted clearly, typically using markdown code blocks to separate different files, e.g., ```python\n# service code\n```, ```Dockerfile\n# dockerfile content\n```.'
+      'The complete Dockerized boilerplate code for the described architecture. This includes placeholder code for each service, their respective Dockerfiles, and a docker-compose.yml file to orchestrate them. The output should be formatted clearly using markdown code blocks to separate different files.'
     ),
 });
 export type BoilerplateCodeGenerationOutput = z.infer<
@@ -49,7 +49,7 @@ For the given architecture description, generate the following:
 2.  **Dockerfile for each service**: Define the necessary steps to build a Docker image for each service.
 3.  **docker-compose.yml**: An orchestration file to easily run all services together, including any required database or messaging queues.
 
-Ensure the output is directly usable and follows best practices for Dockerization and the specified technologies. Format the output using markdown code blocks for each file (e.g., ```python\n# Your Python code here\n```, ```Dockerfile\n# Your Dockerfile content here\n```). Provide full file paths for context (e.g., \`gateway/app.py\`, \`gateway/Dockerfile\`).
+Ensure the output is directly usable and follows best practices for Dockerization and the specified technologies. Format the output using markdown code blocks for each file. Provide full file paths for context (e.g., gateway/app.py, gateway/Dockerfile).
 
 Architecture Description:
 {{{architectureDescription}}}`,
