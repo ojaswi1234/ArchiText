@@ -17,17 +17,22 @@ import {
   Download, 
   Loader2, 
   AlertTriangle,
-  Info
+  Info,
+  Rocket,
+  Terminal,
+  ChevronRight
 } from "lucide-react";
 import Link from "next/link";
 import { architecturalTradeoffAnalysis, ArchitecturalTradeoffAnalysisOutput } from "@/ai/flows/architectural-tradeoff-analysis-flow";
 import { estimateAzureCost, AzureCostEstimationOutput } from "@/ai/flows/azure-cost-estimation";
 import { generateBoilerplateCode, BoilerplateCodeGenerationOutput } from "@/ai/flows/boilerplate-code-generation-flow";
+import { generateAzureDeploymentGuide, AzureDeploymentGuideOutput } from "@/ai/flows/azure-deployment-guide-flow";
 import { Mermaid } from "@/components/ui/mermaid";
 
 export default function ArchitectureDetailPage() {
   const { id } = useParams() as { id: string };
   const [arch, setArch] = useState<SavedArchitecture | null>(null);
+  const [activeTab, setActiveTab] = useState("design");
   
   // Analysis States
   const [tradeoffs, setTradeoffs] = useState<ArchitecturalTradeoffAnalysisOutput | null>(null);
@@ -38,6 +43,9 @@ export default function ArchitectureDetailPage() {
   
   const [code, setCode] = useState<BoilerplateCodeGenerationOutput | null>(null);
   const [loadingCode, setLoadingCode] = useState(false);
+
+  const [deployment, setDeployment] = useState<AzureDeploymentGuideOutput | null>(null);
+  const [loadingDeployment, setLoadingDeployment] = useState(false);
 
   useEffect(() => {
     const data = getArchitectureById(id);
@@ -96,6 +104,26 @@ export default function ArchitectureDetailPage() {
     }
   };
 
+  const loadDeployment = async () => {
+    if (!arch || deployment) return;
+    setLoadingDeployment(true);
+    try {
+      const result = await generateAzureDeploymentGuide({
+        architectureDescription: arch.diagramDescription,
+        components: arch.components.map(c => ({
+          name: c.name,
+          type: c.type,
+          technology: c.technology
+        })),
+      });
+      setDeployment(result);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingDeployment(false);
+    }
+  };
+
   if (!arch) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
@@ -121,14 +149,20 @@ export default function ArchitectureDetailPage() {
             <Button variant="outline" className="border-white/10 h-10 px-4 rounded-full">
               <Download className="mr-2 h-4 w-4" /> Export PDF
             </Button>
-            <Button className="bg-primary hover:bg-primary/90 h-10 px-6 rounded-full">
+            <Button 
+              className="bg-primary hover:bg-primary/90 h-10 px-6 rounded-full"
+              onClick={() => {
+                setActiveTab("deployment");
+                loadDeployment();
+              }}
+            >
               Deploy to Azure
             </Button>
           </div>
         </div>
 
-        <Tabs defaultValue="design" className="space-y-6">
-          <TabsList className="bg-black/20 p-1 border border-white/5 rounded-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="bg-black/20 p-1 border border-white/5 rounded-full overflow-x-auto justify-start md:justify-center">
             <TabsTrigger value="design" className="rounded-full px-6 flex items-center gap-2">
               <Network className="h-4 w-4" /> Architecture
             </TabsTrigger>
@@ -140,6 +174,9 @@ export default function ArchitectureDetailPage() {
             </TabsTrigger>
             <TabsTrigger value="code" onClick={loadCode} className="rounded-full px-6 flex items-center gap-2">
               <Code2 className="h-4 w-4" /> Boilerplate
+            </TabsTrigger>
+            <TabsTrigger value="deployment" onClick={loadDeployment} className="rounded-full px-6 flex items-center gap-2">
+              <Rocket className="h-4 w-4" /> Deployment
             </TabsTrigger>
           </TabsList>
 
@@ -311,6 +348,60 @@ export default function ArchitectureDetailPage() {
               </Card>
             ) : null}
           </TabsContent>
+
+          <TabsContent value="deployment" className="animate-in fade-in duration-500">
+            {loadingDeployment ? (
+              <LoadingState message="Generating Azure deployment guide..." />
+            ) : deployment ? (
+              <div className="space-y-6">
+                <Card className="glass-panel border-white/5 bg-gradient-to-r from-blue-900/10 to-transparent">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Rocket className="h-6 w-6 text-primary" />
+                      Deployment Strategy
+                    </CardTitle>
+                    <CardDescription>
+                      {deployment.summary}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <div className="grid grid-cols-1 gap-4">
+                  {deployment.steps.map((step, idx) => (
+                    <Card key={idx} className="glass-panel border-white/5 hover:border-primary/20 transition-colors">
+                      <CardHeader className="flex flex-row items-center gap-4 space-y-0 pb-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/20 text-primary font-bold text-sm">
+                          {idx + 1}
+                        </div>
+                        <CardTitle className="text-lg">{step.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {step.description}
+                        </p>
+                        {step.command && (
+                          <div className="relative group">
+                            <div className="bg-black/40 rounded-lg p-3 font-code text-xs text-secondary flex items-center gap-2 overflow-x-auto">
+                              <Terminal className="h-4 w-4 shrink-0 opacity-50" />
+                              <code className="whitespace-nowrap">{step.command}</code>
+                            </div>
+                            <Button 
+                              size="icon" 
+                              variant="ghost" 
+                              className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => navigator.clipboard.writeText(step.command || "")}
+                            >
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </TabsContent>
         </Tabs>
       </main>
     </div>
@@ -324,7 +415,7 @@ function LoadingState({ message }: { message: string }) {
         <div className="absolute inset-0 bg-primary blur-2xl opacity-20 animate-pulse rounded-full" />
         <Loader2 className="h-16 w-16 text-primary animate-spin relative z-10" />
       </div>
-      <p className="text-lg text-muted-foreground font-headline animate-pulse">{message}</p>
+      <p className="text-lg text-muted-foreground font-headline animate-pulse text-center px-4">{message}</p>
     </div>
   );
 }

@@ -35,7 +35,7 @@ Include:
 2. Dockerfiles for each service.
 3. A docker-compose.yml file.
 
-Format the output clearly using markdown code blocks. For each block, specify the file path as a header or comment.
+Format the output clearly using markdown code blocks. For each block, specify the file path in a comment or header. Do not use escaped characters that might break the parser.
 
 Architecture:
 {{{architectureDescription}}}`,
