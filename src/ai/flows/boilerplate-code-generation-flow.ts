@@ -14,7 +14,7 @@ const BoilerplateCodeGenerationInputSchema = z.object({
   architectureDescription: z
     .string()
     .describe(
-      'A detailed description of the system architecture. This should include a list of core services, their primary functionalities, desired programming languages or frameworks for each service, and any notable dependencies or interactions between them. For example: "A microservices architecture with a Python Flask API gateway, a Node.js Express user service, and a Java Spring Boot product service. All services should use PostgreSQL databases and communicate via Kafka. Include Dockerfiles for each service and a docker-compose.yml."'
+      'A detailed description of the system architecture. This should include a list of core services, their primary functionalities, desired programming languages or frameworks for each service, and any notable dependencies or interactions between them.'
     ),
 });
 export type BoilerplateCodeGenerationInput = z.infer<
@@ -49,7 +49,7 @@ For the given architecture description, generate the following:
 2.  **Dockerfile for each service**: Define the necessary steps to build a Docker image for each service.
 3.  **docker-compose.yml**: An orchestration file to easily run all services together, including any required database or messaging queues.
 
-Ensure the output is directly usable and follows best practices for Dockerization and the specified technologies. Format the output using markdown code blocks for each file. Provide full file paths for context (e.g., gateway/app.py, gateway/Dockerfile).
+Ensure the output is directly usable and follows best practices for Dockerization and the specified technologies. Format the output using markdown code blocks for each file. Include the intended file path as a header or comment at the top of each block.
 
 Architecture Description:
 {{{architectureDescription}}}`,
