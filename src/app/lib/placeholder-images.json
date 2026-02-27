@@ -1,0 +1,11 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Abstract technological architecture network",
+      "imageUrl": "https://picsum.photos/seed/architext-hero/1200/800",
+      "imageHint": "network architecture"
+    }
+  ]
+}
