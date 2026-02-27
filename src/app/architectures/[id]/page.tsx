@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -24,6 +23,7 @@ import Link from "next/link";
 import { architecturalTradeoffAnalysis, ArchitecturalTradeoffAnalysisOutput } from "@/ai/flows/architectural-tradeoff-analysis-flow";
 import { estimateAzureCost, AzureCostEstimationOutput } from "@/ai/flows/azure-cost-estimation";
 import { generateBoilerplateCode, BoilerplateCodeGenerationOutput } from "@/ai/flows/boilerplate-code-generation-flow";
+import { Mermaid } from "@/components/ui/mermaid";
 
 export default function ArchitectureDetailPage() {
   const { id } = useParams() as { id: string };
@@ -69,7 +69,7 @@ export default function ArchitectureDetailPage() {
         components: arch.components.map(c => ({
           name: c.name,
           serviceType: c.type,
-          region: "East US", // Default region for estimation
+          region: "East US",
           specifications: { tier: "Standard", purpose: c.purpose }
         })),
       });
@@ -149,16 +149,10 @@ export default function ArchitectureDetailPage() {
                 <Card className="glass-panel border-white/5">
                   <CardHeader>
                     <CardTitle className="text-xl">Architectural Overview</CardTitle>
-                    <CardDescription>Visual representation of component interactions.</CardDescription>
+                    <CardDescription>Live system design diagram.</CardDescription>
                   </CardHeader>
-                  <CardContent className="h-[400px] flex items-center justify-center bg-black/40 rounded-lg border border-white/5 relative group">
-                    <div className="text-center space-y-4 max-w-md p-6">
-                      <Network className="h-12 w-12 text-primary mx-auto opacity-50 group-hover:opacity-100 transition-opacity" />
-                      <div className="font-code text-xs text-muted-foreground whitespace-pre-wrap">
-                        {arch.diagramDescription}
-                      </div>
-                      <p className="text-xs text-muted-foreground italic">Diagram rendering component would load this description into Mermaid.js or similar visualizer.</p>
-                    </div>
+                  <CardContent>
+                    <Mermaid chart={arch.diagramDescription} />
                   </CardContent>
                 </Card>
 
@@ -250,7 +244,7 @@ export default function ArchitectureDetailPage() {
                   <CardContent className="p-10 flex flex-col md:flex-row items-center justify-between gap-8">
                     <div className="space-y-2 text-center md:text-left">
                       <h2 className="text-xl font-headline">Total Estimated Monthly Cost</h2>
-                      <p className="text-muted-foreground text-sm max-w-md">Estimated based on standard Azure pricing for East US. Includes basic configuration and traffic assumptions.</p>
+                      <p className="text-muted-foreground text-sm max-w-md">Estimated based on standard Azure pricing. Includes basic configuration and traffic assumptions.</p>
                     </div>
                     <div className="text-center">
                       <div className="text-5xl font-headline font-bold text-secondary">${costs.totalMonthlyCostUSD}</div>
@@ -301,7 +295,9 @@ export default function ArchitectureDetailPage() {
                     <CardTitle className="text-lg font-headline">Service Boilerplate</CardTitle>
                     <CardDescription>Multi-service docker-compose setup</CardDescription>
                   </div>
-                  <Button size="sm" variant="outline" className="rounded-full h-8">
+                  <Button size="sm" variant="outline" className="rounded-full h-8" onClick={() => {
+                    navigator.clipboard.writeText(code.dockerizedBoilerplateCode);
+                  }}>
                     <Download className="mr-2 h-3 w-3" /> Copy All
                   </Button>
                 </CardHeader>

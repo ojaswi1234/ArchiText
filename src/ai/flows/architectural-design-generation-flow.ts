@@ -1,10 +1,6 @@
 'use server';
 /**
  * @fileOverview An AI agent that generates a proposed system architecture based on natural language requirements.
- *
- * - architecturalDesignGeneration - A function that handles the architectural design generation process.
- * - ArchitecturalDesignGenerationInput - The input type for the architecturalDesignGeneration function.
- * - ArchitecturalDesignGenerationOutput - The return type for the architecturalDesignGeneration function.
  */
 
 import { ai } from '@/ai/genkit';
@@ -16,7 +12,7 @@ const ArchitecturalDesignGenerationInputSchema = z.object({
 export type ArchitecturalDesignGenerationInput = z.infer<typeof ArchitecturalDesignGenerationInputSchema>;
 
 const ArchitecturalDesignGenerationOutputSchema = z.object({
-  diagramDescription: z.string().describe('A detailed description of the proposed system architecture, suitable for generating a diagram.'),
+  diagramDescription: z.string().describe('A valid Mermaid.js diagram definition (e.g., graph TD) representing the system architecture. Use standard Mermaid syntax.'),
   components: z.array(
     z.object({
       name: z.string().describe('The name of the architectural component.'),
@@ -37,14 +33,15 @@ const architecturalDesignGenerationPrompt = ai.definePrompt({
   name: 'architecturalDesignGenerationPrompt',
   input: { schema: ArchitecturalDesignGenerationInputSchema },
   output: { schema: ArchitecturalDesignGenerationOutputSchema },
-  prompt: `You are an expert system architect and a Generative AI agent called ArchiText. Your task is to analyze user requirements and propose a production-ready system architecture.
+  prompt: `You are an expert system architect called ArchiText. Analyze user requirements and propose a production-ready system architecture.
 
-Based on the following system requirements, provide a detailed description of the architecture, a list of core components with their type, purpose, and suggested technology, and a clear rationale for your design choices.
+Provide:
+1. A valid Mermaid.js diagram code (usually starting with graph TD).
+2. A detailed list of components with their technologies.
+3. A rationale for these choices.
 
-System Requirements:
-{{{requirements}}}
-
-Ensure the output is in the specified JSON format, strictly adhering to the schema. Think step-by-step to cover all aspects of a production-ready system.`,
+Requirements:
+{{{requirements}}}`,
 });
 
 const architecturalDesignGenerationFlow = ai.defineFlow(
